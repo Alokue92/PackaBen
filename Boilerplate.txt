@@ -1,0 +1,6 @@
+# You may need to run the following line in order to install PackaBen.
+#
+# install.packages("devtools")
+# library(devtools)
+# options(download.file.method = "wininet")
+# install_github("Alokue92/Packaben")

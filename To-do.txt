@@ -1,0 +1,53 @@
+Currently it's not necessary to have a PackaBenPy. We'll use rpy2 to run functions out of R until it becomes prohibatively slow, and then we'll add functions into PackaBenPy to overcome slow speeds. 
+
+PackaBen should include the following functions:
+
+ReloadSIA() 
+WorkingHistogram()
+	and associated functions()
+TreatHDAsSQL()
+CreateFog()?
+Speed()
+	This will eventually encapsulate
+		Binning
+		Multicoring
+			For and dplyr style
+		Daemon access
+
+
+-----------------------
+
+
+Implement is_sql_compatible()
+
+Possibly attempt a “dry run” with a small in-memory or mock DB, see if dbplyr can translate the pipeline.
+Or parse the function body for known verbs (filter, mutate, arrange, etc.) and bail if we see unknown R calls.
+Implement or refine apply_pipeline_sql()
+
+Actually call pipeline_func(lazy_tbl) and ensure it stays lazy. Possibly you’d do:
+r
+Copy
+Edit
+result <- pipeline_func(lazy_tbl)
+# check class of result -> still a lazy object?
+# if not, user might have forced collect()
+Implement create_sql_from_file()
+
+For CSV ingestion in DuckDB (like dbExecute(con, "CREATE TABLE x AS SELECT * FROM read_csv_auto(...)")).
+If you have different file formats (Parquet, etc.), handle accordingly.
+Implement chunk_based_read_csv_and_process()
+
+Possibly use readr::read_csv_chunked() or manually read partial rows in a loop.
+Or vroom::vroom with indexing. Then do parallel transforms and combine.
+Implement chunk_based_in_memory()
+
+The logic from your earlier skeleton for chunking a data frame in memory, writing each chunk to disk, parallelizing, reassembling, etc.
+If you want partial aggregator logic for global grouping, you’ll do two-pass. Right now, we do a stub.
+Edge Cases
+
+If the user’s pipeline does partial advanced R code plus a global arrange(), you might want to fallback to an error or a custom message.
+If the user is on a system that doesn’t have wmic (e.g., Mac/Linux), your resource detection might differ.
+If the file format is not CSV, handle that separately.
+Testing & Error Handling
+
+Try small data, large data, different pipeline complexities, etc. to ensure it doesn’t break unexpectedly.
